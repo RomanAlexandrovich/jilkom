@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 // Middleware для парсинга JSON-данных из тела запроса
 app.use(bodyParser.json());
 
-app.get('/app', function (req, res) {
+app.get('/', function (req, res) {
       res.sendFile(path.join(__dirname, 'app.html'));
     });
 
