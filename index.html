@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Selfie App</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: row;
+      margin-bottom: 10px;
+    }
+
+    .input-group label {
+      width: 100px;
+      margin-right: 10px;
+      text-align: right;
+    }
+
+    .input-group input {
+      width: 200px;
+      padding: 5px;
+    }
+
+    #captureBtn {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="input-group">
+      <label for="firstName">Фамилия:</label>
+      <input type="text" id="firstName" name="firstName" required>
+    </div>
+    <div class="input-group">
+      <label for="lastName">Имя:</label>
+      <input type="text" id="lastName" name="lastName" required>
+    </div>
+    <div class="input-group">
+      <label for="middleName">Отчество:</label>
+      <input type="text" id="middleName" name="middleName" required>
+    </div>
+    <div class="input-group">
+      <label for="groupNumber">Номер группы:</label>
+      <input type="text" id="groupNumber" name="groupNumber" required>
+    </div>
+    <div class="input-group">
+      <label for="phoneNumber">Номер телефона:</label>
+      <input type="text" id="phoneNumber" name="phoneNumber" required>
+    </div>
+  </div>
+
+  <button id="captureBtn">Сделать снимок</button>
+  <video id="video" width="640" height="480" autoplay></video>
+
+  <script>
+    navigator.mediaDevices.getUserMedia({ video: true })
+    .then(function (stream) {
+    var videoElement = document.getElementById('video'); // Элемент <video> для отображения видео
+    videoElement.srcObject = stream; // Присваивание видеопотока элементу <video>
+    videoElement.play(); // Воспроизведение видео
+
+        // Обработка нажатия кнопки "Сделать снимок"
+        var captureBtn = document.getElementById('captureBtn');
+        captureBtn.addEventListener('click', function () {
+          // Создание <canvas> для отрисовки снимка
+          var canvas = document.createElement('canvas');
+          canvas.width = videoElement.videoWidth;
+          canvas.height = videoElement.videoHeight;
+          var context = canvas.getContext('2d');
+          context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+          // Преобразование снимка в данные формата base64
+          var imageDataURL = canvas.toDataURL('image/jpeg');
+
+          // Получение значений полей ввода
+          var firstName = document.getElementById('firstName').value;
+          var lastName = document.getElementById('lastName').value;
+          var middleName = document.getElementById('middleName').value;
+          var groupNumber = document.getElementById('groupNumber').value;
+          var phoneNumber = document.getElementById('phoneNumber').value;
+
+          // Создание объекта с данными для отправки на сервер
+          var formData = {
+        firstName: firstName,
+        lastName: lastName,
+        middleName: middleName,
+        groupNumber: groupNumber,
+        phoneNumber: phoneNumber,
+        imageDataURL: imageDataURL
+      };
+
+      // Отправка данных на сервер
+      sendFormData(formData);
+    });
+  })
+  .catch(function (error) {
+    console.error('Ошибка захвата видео: ', error);
+  });
+
+// Отправка данных на сервер
+function sendFormData(formData) {
+  // Отправка запроса на сервер с помощью Fetch API
+  fetch('/upload', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(formData)
+  })
+    .then(function (response) {
+      console.log('Данные отправлены на сервер');
+    })
+    .catch(function (error) {
+      console.error('Ошибка отправки данных на сервер: ', error);
+    });
+}
+  </script>
+</body>
+</html>
